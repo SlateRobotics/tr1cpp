@@ -1,5 +1,6 @@
 #include <tr1cpp/tr1.h>
 #include <tr1cpp/arm.h>
+#include <tr1cpp/joint.h>
 
 namespace tr1cpp
 {

@@ -21,37 +21,31 @@ namespace tr1cpp
 	I2C::~I2C() {
 		close(fd);
 	}
-	//! Read a single byte from I2C Bus
-	/*!
-	 \param address register address to read from
-	 */
-	uint8_t I2C::read_byte(uint8_t address) {
+
+	uint8_t I2C::readByte(uint8_t registerNumber) {
 		if (fd != -1) {
-			uint8_t buff[BUFFER_SIZE];
-			buff[0] = address;
-			if (write(fd, buff, BUFFER_SIZE) != BUFFER_SIZE) {
-				ROS_ERROR("I2C slave 0x%x failed to go to register 0x%x [read_byte():write %d]", _i2caddr, address, errno);
+			uint8_t bufferSize = 1;
+			uint8_t buff[bufferSize];
+			buff[0] = registerNumber;
+
+			if (write(fd, buff, BUFFER_SIZE) != bufferSize) {
+				ROS_ERROR("I2C slave 0x%x failed to go to register 0x%x [read_byte():write %d]", _i2caddr, registerNumber, errno);
 				return (-1);
 			} else {
-				if (read(fd, dataBuffer, BUFFER_SIZE) != BUFFER_SIZE) {
-					ROS_ERROR("Could not read from I2C slave 0x%x, register 0x%x [read_byte():read %d]", _i2caddr, address, errno);
+				if (read(fd, buff, bufferSize) != bufferSize) {
+					ROS_ERROR("Could not read from I2C slave 0x%x, register 0x%x [read_byte():read %d]", _i2caddr, registerNumber, errno);
 					return (-1);
 				} else {
-					return dataBuffer[0];
+					return buff[0];
 				}
 			}
 		} else {
 			ROS_ERROR("Device File not available. Aborting read");
 			return (-1);
 		}
-
 	}
-	//! Write a single byte from a I2C Device
-	/*!
-	 \param address register address to write to
-	 \param data 8 bit data to write
-	 */
-	uint8_t I2C::write_byte(uint8_t registerNumber, uint8_t data[4]) {
+
+	uint8_t I2C::writeData(uint8_t registerNumber, uint8_t data[4]) {
 		if (fd != -1) {
 			uint8_t buff[5];
 			buff[0] = registerNumber;
@@ -74,7 +68,7 @@ namespace tr1cpp
 		}
 		return 0;
 	}
-	//! Open device file for I2C Device
+
 	void I2C::openfd() {
 		if ((fd = open(busfile, O_RDWR)) < 0) {
 			ROS_ERROR("Couldn't open I2C Bus %d [openfd():open %d]", _i2cbus, errno);

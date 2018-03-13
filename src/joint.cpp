@@ -6,6 +6,13 @@
 
 namespace tr1cpp
 {
+	double constrainAngle(double x){
+		  x = fmod(x + 180,360);
+		  if (x < 0)
+		      x += 360;
+		  return x - 180;
+	}
+
 	Joint::Joint()
 	{
 		
@@ -31,7 +38,26 @@ namespace tr1cpp
 		this->_motorId = motorId;
 	}
 
-	void Joint::step(double effort)
+	double Joint::readAngle()
+	{
+		if (_actuatorType == ACTUATOR_TYPE_MOTOR)
+		{
+			I2C i2cSlave = I2C(1, 0x74);
+			uint8_t position = i2cSlave.readByte(_motorId);
+			double angle = (position / 128.0 * 360.0) + _angleOffset;
+			angle = constrainAngle(angle);
+			//ROS_INFO("MotorId: %i, Position: %i, Angle: %f", _motorId, position, angle);
+			return angle;
+		}
+		else if (_actuatorType == ACTUATOR_TYPE_SERVO)
+		{
+			ROS_ERROR("Cannot read joint value from servo actuator");
+			return 0;
+		}
+		
+	}
+
+	void Joint::actuate(double effort)
 	{
 		if (abs(effort * 100.0) > 100)
 		{
@@ -40,24 +66,21 @@ namespace tr1cpp
 
 		if (_actuatorType == ACTUATOR_TYPE_MOTOR)
 		{
-			if (abs(effort * 100.0) > 25)
-			{
-				uint8_t data[4];
-				_prepareI2C(data, effort);
-				I2C i2cSlave = I2C(1, _getSlaveAddress());
-				uint8_t result = i2cSlave.write_byte(0x00, data);
-				ROS_INFO("Result: [%i]; effort: [%f]; bytes: %i, %i, %i, %i", result, effort, data[0], data[1], data[2], data[3]);
-			}
+			uint8_t data[4];
+			_prepareI2CWrite(data, effort);
+			I2C i2cSlave = I2C(1, _getSlaveAddress());
+			uint8_t result = i2cSlave.writeData(0x00, data);
+			//ROS_INFO("Result: [%i]; effort: [%f]; bytes: %i, %i, %i, %i", result, effort, data[0], data[1], data[2], data[3]);
 		}
 		else if (_actuatorType == ACTUATOR_TYPE_SERVO)
 		{
 			if (effort != _previousEffort)
 			{
 				uint8_t data[4];
-				_prepareI2C(data, effort);
+				_prepareI2CWrite(data, effort);
 				I2C i2cSlave = I2C(1, _getSlaveAddress());
-				uint8_t result = i2cSlave.write_byte(0x00, data);
-				ROS_INFO("Result: [%i]; effort: [%f]; bytes: %i, %i, %i, %i", result, effort, data[0], data[1], data[2], data[3]);
+				uint8_t result = i2cSlave.writeData(0x00, data);
+				//ROS_INFO("Result: [%i]; effort: [%f]; bytes: %i, %i, %i, %i", result, effort, data[0], data[1], data[2], data[3]);
 			}
 		}
 
@@ -87,13 +110,13 @@ namespace tr1cpp
 		this->_maxServoValue = maxValue;
 	}
 
-	void Joint::_prepareI2C(uint8_t result[4], double effort)
+	void Joint::_prepareI2CWrite(uint8_t result[4], double effort)
 	{
 		if (_actuatorType == ACTUATOR_TYPE_MOTOR)
 		{
 			uint8_t speed = floor(abs(effort * 100));
 			uint8_t direction = (effort > 0);
-			uint8_t duration = 10;
+			uint8_t duration = 15;
 
 			result[0] = _motorId;
 			result[1] = speed;
@@ -110,5 +133,15 @@ namespace tr1cpp
 			result[2] = 0;
 			result[3] = 0;
 		}
+	}
+
+	void Joint::setAngleOffset(double angleOffset)
+	{
+		_angleOffset = angleOffset;
+	}
+	
+	int Joint::getActuatorType()
+	{
+		return _actuatorType;
 	}
 }

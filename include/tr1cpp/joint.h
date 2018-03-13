@@ -18,16 +18,21 @@ namespace tr1cpp
 			uint8_t _getSlaveAddress();
 			uint8_t _minServoValue = 0;
 			uint8_t _maxServoValue = 75;
+			double _angleOffset = 0;
 			double _previousEffort;
-			void _prepareI2C(uint8_t result[4], double effort);
+			void _prepareI2CWrite(uint8_t result[4], double effort);
+			void _prepareI2CRead(uint8_t result[4]);
 		public:
 			Joint();
 			Joint(uint8_t motorId);
 			~Joint();
 			void setMotorId(uint8_t motorId);
+			void setAngleOffset(double angleOffset);
 			void setActuatorType(uint8_t actuatorType);
 			void setServoLimits(uint8_t minValue, uint8_t maxValue);
-			void step(double effort);
+			int getActuatorType();
+			void actuate(double effort);
+			double readAngle();
 	};
 }
 

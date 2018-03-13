@@ -2,7 +2,7 @@
 #define I2C_H_
 #include <inttypes.h>
 
-#define BUFFER_SIZE 0x04  //1 byte buffer
+#define BUFFER_SIZE 1
 
 namespace tr1cpp
 {
@@ -12,8 +12,8 @@ namespace tr1cpp
 			I2C(int, int);
 			virtual ~I2C();
 			uint8_t dataBuffer[BUFFER_SIZE];
-			uint8_t read_byte(uint8_t);
-			uint8_t write_byte(uint8_t registerNumber, uint8_t data[4]);
+			uint8_t readByte(uint8_t registerNumber);
+			uint8_t writeData(uint8_t registerNumber, uint8_t data[4]);
 		private:
 			int _i2caddr;
 			int _i2cbus;

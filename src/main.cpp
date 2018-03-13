@@ -49,6 +49,7 @@ namespace tr1cpp
 		if (fd != -1) {
 			uint8_t buff[BUFFER_SIZE];
 			buff[0] = address;
+
 			if (write(fd, buff, BUFFER_SIZE) != BUFFER_SIZE) {
 				cout << "I2C slave 0x%x failed to go to register 0x%x [read_byte():write %d]" << _i2caddr << address << errno;
 				return (-1);

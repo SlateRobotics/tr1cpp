@@ -22,7 +22,7 @@ namespace tr1cpp
 		close(fd);
 	}
 
-	uint8_t I2C::readByte(uint8_t registerNumber) {
+	uint8_t I2C::readByte(uint8_t registerNumber, uint8_t &position) {
 		if (fd != -1) {
 			uint8_t bufferSize = 1;
 			uint8_t buff[bufferSize];
@@ -36,7 +36,8 @@ namespace tr1cpp
 					ROS_ERROR("Could not read from I2C slave 0x%x, register 0x%x [read_byte():read %d]", _i2caddr, registerNumber, errno);
 					return (-1);
 				} else {
-					return buff[0];
+					position = buff[0];
+					return (1);
 				}
 			}
 		} else {

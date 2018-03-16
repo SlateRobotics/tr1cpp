@@ -1,18 +1,15 @@
 #include <stdlib.h>
 #include <math.h>
+#include <stdexcept>
 #include "ros/ros.h"
 #include <tr1cpp/joint.h>
 #include <tr1cpp/i2c.h>
 
+#define PI 3.14159265359
+#define TAU 6.28318530718
+
 namespace tr1cpp
 {
-	double constrainAngle(double x){
-		  x = fmod(x + 180,360);
-		  if (x < 0)
-		      x += 360;
-		  return x - 180;
-	}
-
 	Joint::Joint()
 	{
 		
@@ -40,14 +37,23 @@ namespace tr1cpp
 
 	double Joint::readAngle()
 	{
-		if (_actuatorType == ACTUATOR_TYPE_MOTOR)
-		{
+		if (_actuatorType == ACTUATOR_TYPE_MOTOR) {
+			uint8_t position;
+
 			I2C i2cSlave = I2C(1, 0x74);
-			uint8_t position = i2cSlave.readByte(_motorId);
-			double angle = (position / 128.0 * 360.0) + _angleOffset;
-			angle = constrainAngle(angle);
-			//ROS_INFO("MotorId: %i, Position: %i, Angle: %f", _motorId, position, angle);
-			return angle;
+			uint8_t result = i2cSlave.readByte(_motorId, position);
+			if (result == 1) {
+				double angle = (position / 128.0 * TAU);
+				angle += angleOffset;
+				if (angle > PI) {
+					angle -= TAU;
+				}
+				angle *= readRatio;
+				//ROS_INFO("MotorId: %i, Position: %i, Angle: %f, Angle Offset: %f, Read Ratio: %f", _motorId, position, angle, angleOffset, readRatio);
+				return angle;
+			} else {
+				throw std::runtime_error("I2C Read Error during joint position read. Exiting for safety.");
+			}
 		}
 		else if (_actuatorType == ACTUATOR_TYPE_SERVO)
 		{
@@ -91,11 +97,11 @@ namespace tr1cpp
 	{
 		if (_motorId > 0 && _motorId <= 4)
 		{
-			return _armSlave1Address;
+			return ARM_SLAVE1_ADDRESS;
 		}
 		else if (_motorId > 0 && _motorId <= 8)
 		{
-			return _armSlave2Address;
+			return ARM_SLAVE2_ADDRESS;
 		}
 		else
 		{
@@ -116,7 +122,7 @@ namespace tr1cpp
 		{
 			uint8_t speed = floor(abs(effort * 100));
 			uint8_t direction = (effort > 0);
-			uint8_t duration = 15;
+			uint8_t duration = 10;
 
 			result[0] = _motorId;
 			result[1] = speed;
@@ -133,11 +139,6 @@ namespace tr1cpp
 			result[2] = 0;
 			result[3] = 0;
 		}
-	}
-
-	void Joint::setAngleOffset(double angleOffset)
-	{
-		_angleOffset = angleOffset;
 	}
 	
 	int Joint::getActuatorType()

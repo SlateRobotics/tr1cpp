@@ -43,11 +43,10 @@ namespace tr1cpp
 			I2C i2cSlave = I2C(1, 0x74);
 			uint8_t result = i2cSlave.readByte(_motorId, position);
 			if (result == 1) {
-				double angle = (position / 128.0 * TAU);
+				double angle = (position / 128.0 * TAU);;
 				angle += angleOffset;
-				if (angle > PI) {
-					angle -= TAU;
-				}
+				if (angle > PI) angle -= TAU;
+				if (angle < -PI) angle += TAU;
 				angle *= readRatio;
 				//ROS_INFO("MotorId: %i, Position: %i, Angle: %f, Angle Offset: %f, Read Ratio: %f", _motorId, position, angle, angleOffset, readRatio);
 				return angle;
@@ -60,7 +59,10 @@ namespace tr1cpp
 			ROS_ERROR("Cannot read joint value from servo actuator");
 			return 0;
 		}
-		
+		else
+		{
+			return 0;
+		}
 	}
 
 	void Joint::actuate(double effort)

@@ -29,7 +29,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 add_library(tr1cpp
 	include/${PROJECT_NAME}/i2c.h
 	include/${PROJECT_NAME}/tr1.h
-	include/${PROJECT_NAME}/arm.h
+	include/${PROJECT_NAME}/segment.h
 	include/${PROJECT_NAME}/joint.h
 	src/i2c.cpp
 	src/tr1.cpp

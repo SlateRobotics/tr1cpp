@@ -1,7 +1,8 @@
 #ifndef TR1CPP__TR1_H
 #define TR1CPP__TR1_H
 
-#include <tr1cpp/arm.h>
+#include <sstream>
+#include <tr1cpp/segment.h>
 
 namespace tr1cpp
 {
@@ -11,8 +12,15 @@ namespace tr1cpp
 		public:
 			TR1();
 			~TR1();
-			Arm armRight;
-			Arm armLeft;
+
+			Segment<4> base;
+			Segment<1> torso;
+			Segment<2> head;
+			Segment<8> armRight;
+			Segment<8> armLeft;
+
+			Joint getJoint(std::string jointName);
+			void setJoint(tr1cpp::Joint joint);
 	};
 }
 

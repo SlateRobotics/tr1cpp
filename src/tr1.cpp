@@ -65,8 +65,14 @@ namespace tr1cpp
 		armLeft.joints[6].name = "JointLeftWristRoll";
 		armLeft.joints[7].name = "JointLeftGripper";
 
-		armLeft.joints[6].setActuatorType(ACTUATOR_TYPE_SERVO);
-		armLeft.joints[7].setActuatorType(ACTUATOR_TYPE_SERVO);
+		armLeft.joints[0].setActuatorType(ACTUATOR_TYPE_NONE);
+    armLeft.joints[1].setActuatorType(ACTUATOR_TYPE_NONE);
+    armLeft.joints[2].setActuatorType(ACTUATOR_TYPE_NONE);
+		armLeft.joints[3].setActuatorType(ACTUATOR_TYPE_NONE);
+		armLeft.joints[4].setActuatorType(ACTUATOR_TYPE_NONE);
+		armLeft.joints[5].setActuatorType(ACTUATOR_TYPE_NONE);
+		armLeft.joints[6].setActuatorType(ACTUATOR_TYPE_NONE);
+		armLeft.joints[7].setActuatorType(ACTUATOR_TYPE_NONE);
 
 		armLeft.joints[6].setServoLimits(0, 180);
 		armLeft.joints[7].setServoLimits(0, 75);

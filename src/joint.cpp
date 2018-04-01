@@ -124,7 +124,7 @@ namespace tr1cpp
 		{
 			uint8_t speed = floor(abs(effort * 100));
 			uint8_t direction = (effort > 0);
-			uint8_t duration = 10;
+			uint8_t duration = 15;
 
 			result[0] = _motorId;
 			result[1] = speed;

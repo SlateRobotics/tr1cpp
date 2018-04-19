@@ -22,13 +22,15 @@ namespace tr1cpp
 		close(fd);
 	}
 
-	uint8_t I2C::readByte(uint8_t registerNumber, uint8_t &position) {
+	uint8_t I2C::readBytes(uint8_t registerNumber, uint8_t bufferSize, uint16_t &position) {
 		if (fd != -1) {
-			uint8_t bufferSize = 1;
 			uint8_t buff[bufferSize];
-			buff[0] = registerNumber;
 
-			if (write(fd, buff, BUFFER_SIZE) != bufferSize) {
+			uint8_t writeBufferSize = 1;
+			uint8_t writeBuffer[writeBufferSize];
+			writeBuffer[0] = registerNumber;
+
+			if (write(fd, writeBuffer, writeBufferSize) != writeBufferSize) {
 				ROS_ERROR("I2C slave 0x%x failed to go to register 0x%x [read_byte():write %d]", _i2caddr, registerNumber, errno);
 				return (-1);
 			} else {
@@ -36,7 +38,10 @@ namespace tr1cpp
 					ROS_ERROR("Could not read from I2C slave 0x%x, register 0x%x [read_byte():read %d]", _i2caddr, registerNumber, errno);
 					return (-1);
 				} else {
-					position = buff[0];
+					position = 0;
+					for (int i = 0; i < bufferSize; i++) {
+						position = position + buff[i];
+					}
 					return (1);
 				}
 			}

@@ -31,11 +31,12 @@ namespace tr1cpp
 			~Joint();
 			double angleOffset = 0;
 			double readRatio = 1;
+			uint8_t getMotorId();
 			void setMotorId(uint8_t motorId);
 			void setActuatorType(uint8_t actuatorType);
 			void setServoLimits(uint8_t minValue, uint8_t maxValue);
 			int getActuatorType();
-			void actuate(double effort);
+			void actuate(double effort, uint8_t duration);
 			double readAngle();
 	};
 }

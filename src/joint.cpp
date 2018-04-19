@@ -30,6 +30,11 @@ namespace tr1cpp
 		this->_actuatorType = actuatorType;
 	}
 
+	uint8_t Joint::getMotorId()
+	{
+		return this->_motorId;
+	}
+
 	void Joint::setMotorId(uint8_t motorId)
 	{
 		this->_motorId = motorId;
@@ -38,12 +43,12 @@ namespace tr1cpp
 	double Joint::readAngle()
 	{
 		if (_actuatorType == ACTUATOR_TYPE_MOTOR) {
-			uint8_t position;
+			uint16_t position;
 
 			I2C i2cSlave = I2C(1, 0x74);
-			uint8_t result = i2cSlave.readByte(_motorId, position);
+			uint8_t result = i2cSlave.readBytes(_motorId, 4, position);
 			if (result == 1) {
-				double angle = (position / 128.0 * TAU);;
+				double angle = (position / 1024.0 * TAU);;
 				angle += angleOffset;
 				if (angle > PI) angle -= TAU;
 				if (angle < -PI) angle += TAU;
@@ -51,7 +56,7 @@ namespace tr1cpp
 				//ROS_INFO("MotorId: %i, Position: %i, Angle: %f, Angle Offset: %f, Read Ratio: %f", _motorId, position, angle, angleOffset, readRatio);
 				return angle;
 			} else {
-				throw std::runtime_error("I2C Read Error during joint position read. Exiting for safety.");
+				//throw std::runtime_error("I2C Read Error during joint position read. Exiting for safety.");
 			}
 		}
 		else if (_actuatorType == ACTUATOR_TYPE_SERVO)
@@ -65,7 +70,7 @@ namespace tr1cpp
 		}
 	}
 
-	void Joint::actuate(double effort)
+	void Joint::actuate(double effort, uint8_t duration = 15)
 	{
 		if (abs(effort * 100.0) > 100)
 		{
@@ -74,7 +79,12 @@ namespace tr1cpp
 
 		if (_actuatorType == ACTUATOR_TYPE_MOTOR)
 		{
+			if (abs(effort) < 0.30) {
+				return;
+			}
+
 			uint8_t data[4];
+			data[3] = duration;
 			_prepareI2CWrite(data, effort);
 			I2C i2cSlave = I2C(1, _getSlaveAddress());
 			uint8_t result = i2cSlave.writeData(0x00, data);
@@ -124,12 +134,12 @@ namespace tr1cpp
 		{
 			uint8_t speed = floor(abs(effort * 100));
 			uint8_t direction = (effort > 0);
-			uint8_t duration = 15;
+			//uint8_t duration = 5;
 
 			result[0] = _motorId;
 			result[1] = speed;
 			result[2] = direction;
-			result[3] = duration;
+			//result[3] = duration;
 		}
 		else if (_actuatorType == ACTUATOR_TYPE_SERVO)
 		{

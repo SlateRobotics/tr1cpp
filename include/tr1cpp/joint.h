@@ -4,8 +4,10 @@
 #include <sstream>
 #include <tr1cpp/i2c.h>
 
+#define BASE_SLAVE_ADRESS 0x70
 #define ARM_SLAVE1_ADDRESS 0x72
 #define ARM_SLAVE2_ADDRESS 0x73
+#define ARM_ENCODER_SLAVE_ADDRESS 0x74
 
 #define ACTUATOR_TYPE_NONE -1
 #define ACTUATOR_TYPE_MOTOR 0
@@ -29,6 +31,7 @@ namespace tr1cpp
 			Joint();
 			Joint(uint8_t motorId);
 			~Joint();
+			double sensorResolution = 1024;
 			double angleOffset = 0;
 			double readRatio = 1;
 			uint8_t getMotorId();

@@ -14,28 +14,30 @@ namespace tr1cpp
 			armLeft.joints[i].setMotorId(i + 1);
 		}
 
-		//base
-		base.joints[0].name = "JointBaseWheelFL";
-		base.joints[0].setMotorId(9);
-		base.joints[1].name = "JointBaseWheelFR";
-		base.joints[1].setMotorId(10);
-		base.joints[2].name = "JointBaseWheelBL";
-		base.joints[2].setMotorId(11);
-		base.joints[3].name = "JointBaseWheelBR";
-		base.joints[3].setMotorId(12);
+		base.joints[0].name = "base_to_wheel1";
+		base.joints[1].name = "base_to_wheel2";
+		base.joints[2].name = "base_to_wheel3";
+		base.joints[3].name = "base_to_wheel4";
 
-		//head
 		head.joints[0].name = "neck_base_to_neck";
 		head.joints[1].name = "neck_to_head";
+
+		torso.joints[0].name = "base_to_body";
+
+		for (int i = 0; i < base.size(); i++)
+		{
+			base.joints[i].setActuatorType(ACTUATOR_TYPE_NONE);
+		}
 
 		for (int i = 0; i < head.size(); i++)
 		{
 			head.joints[i].setActuatorType(ACTUATOR_TYPE_NONE);
 		}
 
-		//torso
-		torso.joints[0].name = "JointTorsoExtension";
-		torso.joints[0].setMotorId(13);
+		for (int i = 0; i < torso.size(); i++)
+		{
+			torso.joints[i].setActuatorType(ACTUATOR_TYPE_NONE);
+		}
 
 		//armRight
 		armRight.joints[0].name = "JointRightShoulderPan";
@@ -53,7 +55,7 @@ namespace tr1cpp
 		armRight.joints[7].setActuatorType(ACTUATOR_TYPE_SERVO);
 
 		armRight.joints[6].setServoLimits(0, 180);
-		armRight.joints[7].setServoLimits(40, 135);
+		armRight.joints[7].setServoLimits(40, 120);
 
 		//armLeft
 		armLeft.joints[0].name = "JointLeftShoulderPan";
@@ -66,8 +68,8 @@ namespace tr1cpp
 		armLeft.joints[7].name = "JointLeftGripper";
 
 		armLeft.joints[0].setActuatorType(ACTUATOR_TYPE_NONE);
-    	armLeft.joints[1].setActuatorType(ACTUATOR_TYPE_NONE);
-	    armLeft.joints[2].setActuatorType(ACTUATOR_TYPE_NONE);
+    armLeft.joints[1].setActuatorType(ACTUATOR_TYPE_NONE);
+    armLeft.joints[2].setActuatorType(ACTUATOR_TYPE_NONE);
 		armLeft.joints[3].setActuatorType(ACTUATOR_TYPE_NONE);
 		armLeft.joints[4].setActuatorType(ACTUATOR_TYPE_NONE);
 		armLeft.joints[5].setActuatorType(ACTUATOR_TYPE_NONE);

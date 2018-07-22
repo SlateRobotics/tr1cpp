@@ -38,10 +38,16 @@ namespace tr1cpp
 					ROS_ERROR("Could not read from I2C slave 0x%x, register 0x%x [read_byte():read %d]", _i2caddr, registerNumber, errno);
 					return (-1);
 				} else {
-					position = 0;
+					position = 1;
 					for (int i = 0; i < bufferSize; i++) {
-						position = position + buff[i];
+						int shift = pow(256, abs(i + 1 - bufferSize));
+						position = position + (buff[i] * shift);
+						if (registerNumber == 2) {
+							//ROS_INFO("%i: %i", i, buff[i]);
+						}
 					}
+					uint32_t excessK = pow(256, bufferSize)/2;
+					position -= excessK;
 					return (1);
 				}
 			}

@@ -26,12 +26,11 @@ namespace tr1cpp
 
 		//head
 		head.joints[0].name = "neck_base_to_neck";
+		head.joints[0].setMotorId(14);
+		head.joints[0].sensorResolution = 128;
 		head.joints[1].name = "neck_to_head";
-
-		for (int i = 0; i < head.size(); i++)
-		{
-			head.joints[i].setActuatorType(ACTUATOR_TYPE_NONE);
-		}
+		head.joints[1].setMotorId(15);
+		head.joints[1].sensorResolution = 128;
 
 		//torso
 		torso.joints[0].name = "JointTorsoExtension";
@@ -39,43 +38,51 @@ namespace tr1cpp
 
 		//armRight
 		armRight.joints[0].name = "JointRightShoulderPan";
+		armRight.joints[0].setMotorId(1);
 		armRight.joints[1].name = "JointRightShoulderTilt";
+		armRight.joints[1].setMotorId(2);
 		armRight.joints[2].name = "JointRightUpperArmRoll";
+		armRight.joints[2].setMotorId(3);
 		armRight.joints[3].name = "JointRightElbowFlex";
+		armRight.joints[3].setMotorId(4);
 		armRight.joints[4].name = "JointRightForearmRoll";
+		armRight.joints[4].setMotorId(5);
 		armRight.joints[5].name = "JointRightWristFlex";
+		armRight.joints[5].setMotorId(6);
 		armRight.joints[6].name = "JointRightWristRoll";
+		armRight.joints[6].setMotorId(7);
 		armRight.joints[7].name = "JointRightGripper";
-
-		armRight.joints[5].sensorResolution = 128;
+		armRight.joints[7].setMotorId(8);
 
 		armRight.joints[6].setActuatorType(ACTUATOR_TYPE_SERVO);
 		armRight.joints[7].setActuatorType(ACTUATOR_TYPE_SERVO);
 
 		armRight.joints[6].setServoLimits(0, 180);
-		armRight.joints[7].setServoLimits(40, 135);
+		armRight.joints[7].setServoLimits(50, 170);
 
 		//armLeft
 		armLeft.joints[0].name = "JointLeftShoulderPan";
+		armLeft.joints[0].setMotorId(16);
 		armLeft.joints[1].name = "JointLeftShoulderTilt";
+		armLeft.joints[1].setMotorId(17);
 		armLeft.joints[2].name = "JointLeftUpperArmRoll";
+		armLeft.joints[2].setMotorId(18);
 		armLeft.joints[3].name = "JointLeftElbowFlex";
+		armLeft.joints[3].setMotorId(19);
 		armLeft.joints[4].name = "JointLeftForearmRoll";
+		armLeft.joints[4].setMotorId(20);
 		armLeft.joints[5].name = "JointLeftWristFlex";
+		armLeft.joints[5].setMotorId(21);
 		armLeft.joints[6].name = "JointLeftWristRoll";
+		armLeft.joints[6].setMotorId(22);
 		armLeft.joints[7].name = "JointLeftGripper";
+		armLeft.joints[7].setMotorId(23);
 
-		armLeft.joints[0].setActuatorType(ACTUATOR_TYPE_NONE);
-    	armLeft.joints[1].setActuatorType(ACTUATOR_TYPE_NONE);
-	    armLeft.joints[2].setActuatorType(ACTUATOR_TYPE_NONE);
-		armLeft.joints[3].setActuatorType(ACTUATOR_TYPE_NONE);
-		armLeft.joints[4].setActuatorType(ACTUATOR_TYPE_NONE);
-		armLeft.joints[5].setActuatorType(ACTUATOR_TYPE_NONE);
-		armLeft.joints[6].setActuatorType(ACTUATOR_TYPE_NONE);
-		armLeft.joints[7].setActuatorType(ACTUATOR_TYPE_NONE);
+		armLeft.joints[6].setActuatorType(ACTUATOR_TYPE_SERVO);
+		armLeft.joints[7].setActuatorType(ACTUATOR_TYPE_SERVO);
 
 		armLeft.joints[6].setServoLimits(0, 180);
-		armLeft.joints[7].setServoLimits(0, 55);
+		armLeft.joints[7].setServoLimits(20, 120);
 	}
 
 	TR1::~TR1()

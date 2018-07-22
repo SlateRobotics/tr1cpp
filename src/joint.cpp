@@ -45,7 +45,7 @@ namespace tr1cpp
 		if (_actuatorType == ACTUATOR_TYPE_MOTOR) {
 			uint16_t position;
 
-			I2C i2cSlave = I2C(1, ARM_ENCODER_SLAVE_ADDRESS);
+			I2C i2cSlave = I2C(0, _getSlaveAddress());
 			uint8_t result = i2cSlave.readBytes(_motorId, 4, position);
 			if (result == 1) {
 				double angle = (position / sensorResolution * TAU);;
@@ -53,7 +53,9 @@ namespace tr1cpp
 				if (angle > PI) angle -= TAU;
 				if (angle < -PI) angle += TAU;
 				angle *= readRatio;
-				//ROS_INFO("MotorId: %i, Position: %i, Angle: %f, Angle Offset: %f, Read Ratio: %f", _motorId, position, angle, angleOffset, readRatio);
+				if (_motorId == 2) {
+					//ROS_INFO("MotorId: %i, Position: %i, Angle: %f, Angle Offset: %f, Read Ratio: %f", _motorId, position, angle, angleOffset, readRatio);
+				}
 				return angle;
 			} else {
 				//throw std::runtime_error("I2C Read Error during joint position read. Exiting for safety.");
@@ -79,14 +81,14 @@ namespace tr1cpp
 
 		if (_actuatorType == ACTUATOR_TYPE_MOTOR)
 		{
-			if (abs(effort) < 0.30) {
+			if (abs(effort * 100.0) < 10) {
 				return;
 			}
 
 			uint8_t data[4];
 			data[3] = duration;
 			_prepareI2CWrite(data, effort);
-			I2C i2cSlave = I2C(1, _getSlaveAddress());
+			I2C i2cSlave = I2C(0, _getSlaveAddress());
 			uint8_t result = i2cSlave.writeData(0x00, data);
 			//ROS_INFO("Result: [%i]; effort: [%f]; bytes: %i, %i, %i, %i", result, effort, data[0], data[1], data[2], data[3]);
 		}
@@ -96,7 +98,7 @@ namespace tr1cpp
 			{
 				uint8_t data[4];
 				_prepareI2CWrite(data, effort);
-				I2C i2cSlave = I2C(1, _getSlaveAddress());
+				I2C i2cSlave = I2C(0, _getSlaveAddress());
 				uint8_t result = i2cSlave.writeData(0x00, data);
 				//ROS_INFO("Result: [%i]; effort: [%f]; bytes: %i, %i, %i, %i", result, effort, data[0], data[1], data[2], data[3]);
 			}
@@ -107,17 +109,21 @@ namespace tr1cpp
 
 	uint8_t Joint::_getSlaveAddress()
 	{
-		if (_motorId > 0 && _motorId <= 4)
+		if (_motorId > 0 && _motorId <= 8)
 		{
-			return ARM_SLAVE1_ADDRESS;
-		}
-		else if (_motorId > 0 && _motorId <= 8)
-		{
-			return ARM_SLAVE2_ADDRESS;
+			return ARM_RIGHT_SLAVE_ADDRESS;
 		}
 		else if (_motorId > 0 && _motorId <= 13)
 		{
-			return BASE_SLAVE_ADRESS;
+			return BASE_SLAVE_ADDRESS;
+		}
+		else if (_motorId > 0 && _motorId <= 15)
+		{
+			return HEAD_SLAVE_ADDRESS;
+		}
+		else if (_motorId > 0 && _motorId <= 23)
+		{
+			return ARM_LEFT_SLAVE_ADDRESS;
 		}
 		else
 		{

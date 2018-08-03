@@ -40,22 +40,48 @@ namespace tr1cpp
 		this->_motorId = motorId;
 	}
 
+	double Joint::_filterAngle(double angle)
+	{
+		_angleReads = _angleReads + 1;
+
+		// put value at front of array
+		for (int i = _filterPrevious - 1; i > 0; i--) {
+			_previousAngles[i] = _previousAngles[i - 1];
+		}
+		_previousAngles[0] = angle;
+
+
+		int filterIterations = _filterPrevious;
+		if (_angleReads < _filterPrevious) {
+			filterIterations = _angleReads;
+		}
+
+		double angleSum = 0;
+		for (int i = 0; i < filterIterations; i++) {
+			angleSum = angleSum + _previousAngles[i];
+		}
+
+		double filterResult = angleSum / (filterIterations * 1.0);
+
+		//ROS_INFO("%f, %f, %f, %i", angle, angleSum, filterResult, filterIterations);
+
+		return filterResult;
+	}
+
 	double Joint::readAngle()
 	{
 		if (_actuatorType == ACTUATOR_TYPE_MOTOR) {
 			uint16_t position;
 
-			I2C i2cSlave = I2C(0, _getSlaveAddress());
+			I2C i2cSlave = I2C(1, _getSlaveAddress());
 			uint8_t result = i2cSlave.readBytes(_motorId, 4, position);
 			if (result == 1) {
-				double angle = (position / sensorResolution * TAU);;
+				double angle = (position / sensorResolution * TAU);
+				angle = _filterAngle(angle);
 				angle += angleOffset;
 				if (angle > PI) angle -= TAU;
 				if (angle < -PI) angle += TAU;
 				angle *= readRatio;
-				if (_motorId == 2) {
-					//ROS_INFO("MotorId: %i, Position: %i, Angle: %f, Angle Offset: %f, Read Ratio: %f", _motorId, position, angle, angleOffset, readRatio);
-				}
 				return angle;
 			} else {
 				//throw std::runtime_error("I2C Read Error during joint position read. Exiting for safety.");
@@ -63,8 +89,7 @@ namespace tr1cpp
 		}
 		else if (_actuatorType == ACTUATOR_TYPE_SERVO)
 		{
-			ROS_ERROR("Cannot read joint value from servo actuator");
-			return 0;
+			return _previousEffort;
 		}
 		else
 		{
@@ -74,21 +99,16 @@ namespace tr1cpp
 
 	void Joint::actuate(double effort, uint8_t duration = 15)
 	{
-		if (abs(effort * 100.0) > 100)
-		{
-			ROS_ERROR("Joint %i effort magnitude is greater than 1. Must keep values between -1 and 1.", _motorId);
-		}
-
 		if (_actuatorType == ACTUATOR_TYPE_MOTOR)
 		{
-			if (abs(effort * 100.0) < 10) {
-				return;
-			}
+			if (effort > 1.0) effort = 1.0;
+			if (effort < -1.0) effort = -1.0;
+			if (abs(effort * 100.0) < 20) return; // because it's too little to do anything
 
 			uint8_t data[4];
 			data[3] = duration;
 			_prepareI2CWrite(data, effort);
-			I2C i2cSlave = I2C(0, _getSlaveAddress());
+			I2C i2cSlave = I2C(1, _getSlaveAddress());
 			uint8_t result = i2cSlave.writeData(0x00, data);
 			//ROS_INFO("Result: [%i]; effort: [%f]; bytes: %i, %i, %i, %i", result, effort, data[0], data[1], data[2], data[3]);
 		}
@@ -98,7 +118,7 @@ namespace tr1cpp
 			{
 				uint8_t data[4];
 				_prepareI2CWrite(data, effort);
-				I2C i2cSlave = I2C(0, _getSlaveAddress());
+				I2C i2cSlave = I2C(1, _getSlaveAddress());
 				uint8_t result = i2cSlave.writeData(0x00, data);
 				//ROS_INFO("Result: [%i]; effort: [%f]; bytes: %i, %i, %i, %i", result, effort, data[0], data[1], data[2], data[3]);
 			}
@@ -138,10 +158,16 @@ namespace tr1cpp
 		this->_maxServoValue = maxValue;
 	}
 
+	double Joint::getPreviousEffort() {
+		return this->_previousEffort;
+	}
+
 	void Joint::_prepareI2CWrite(uint8_t result[4], double effort)
 	{
 		if (_actuatorType == ACTUATOR_TYPE_MOTOR)
 		{
+			if (effort > 1.0) effort = 1.0;
+			if (effort < -1.0) effort = -1.0;
 			uint8_t speed = floor(abs(effort * 100));
 			uint8_t direction = (effort > 0);
 			//uint8_t duration = 5;
@@ -153,7 +179,13 @@ namespace tr1cpp
 		}
 		else if (_actuatorType == ACTUATOR_TYPE_SERVO)
 		{
-			double magnitude = effort * 100.0; //(((effort * -1.0) + 1.0) / 2.0) * 100.0;
+			if (name != "JointRightGripper") {
+				effort = (effort + 1.5708) / 3.1415;
+				if (effort > 1.0) effort = 1.0;
+				if (effort < 0.0) effort = 0.0;
+			}
+
+			double magnitude = effort * 100.0;
 			uint8_t servoValue = floor(_minServoValue + ((_maxServoValue - _minServoValue) * (magnitude / 100.0)));
 
 			result[0] = _motorId;

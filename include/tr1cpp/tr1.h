@@ -13,7 +13,7 @@ namespace tr1cpp
 			TR1();
 			~TR1();
 
-			Segment<4> base;
+			Segment<5> base;
 			Segment<1> torso;
 			Segment<2> head;
 			Segment<8> armRight;

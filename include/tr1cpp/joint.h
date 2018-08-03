@@ -24,6 +24,10 @@ namespace tr1cpp
 			uint8_t _minServoValue = 0;
 			uint8_t _maxServoValue = 75;
 			double _previousEffort;
+			double _filterAngle(double angle);
+			int _angleReads = 0;
+			static const int _filterPrevious = 3;
+			double _previousAngles[_filterPrevious];
 			void _prepareI2CWrite(uint8_t result[4], double effort);
 			void _prepareI2CRead(uint8_t result[4]);
 		public:
@@ -39,6 +43,7 @@ namespace tr1cpp
 			void setActuatorType(uint8_t actuatorType);
 			void setServoLimits(uint8_t minValue, uint8_t maxValue);
 			int getActuatorType();
+			double getPreviousEffort();
 			void actuate(double effort, uint8_t duration);
 			double readAngle();
 	};

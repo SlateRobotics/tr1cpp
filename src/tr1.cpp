@@ -11,7 +11,7 @@ namespace tr1cpp
 		for (int i = 0; i < 8; i++)
 		{
 			armRight.joints[i].setMotorId(i + 1);
-			armLeft.joints[i].setMotorId(i + 1);
+			armLeft.joints[i].setMotorId(i + 16);
 		}
 
 		//base
@@ -23,6 +23,8 @@ namespace tr1cpp
 		base.joints[2].setMotorId(11);
 		base.joints[3].name = "JointBaseWheelBR";
 		base.joints[3].setMotorId(12);
+		base.joints[4].name = "JointTorsoExtension";
+		base.joints[4].setMotorId(13);
 
 		//head
 		head.joints[0].name = "neck_base_to_neck";
@@ -58,7 +60,10 @@ namespace tr1cpp
 		armRight.joints[7].setActuatorType(ACTUATOR_TYPE_SERVO);
 
 		armRight.joints[6].setServoLimits(0, 180);
-		armRight.joints[7].setServoLimits(50, 170);
+		armRight.joints[7].setServoLimits(0, 150);
+
+		armRight.joints[6].actuate(0, 15);
+		ROS_INFO("wrist set to 0");
 
 		//armLeft
 		armLeft.joints[0].name = "JointLeftShoulderPan";
